@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.local-data/
+.env*
+!.env.example
+*.tsbuildinfo
+output/
+
+# Isolated local development cache
+.next-dev/
