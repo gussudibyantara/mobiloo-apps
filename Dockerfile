@@ -2,7 +2,9 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-RUN pnpm install
+# Izinkan build script esbuild/dependency
+RUN pnpm config set ignore-build-scripts false
+RUN pnpm install --frozen-lockfile=false
 COPY . .
 RUN pnpm build
 
