@@ -6,11 +6,14 @@ const globalForDb = globalThis as unknown as {
 };
 
 // Membuat pool koneksi menggunakan DATABASE_URL
+// Mengatur ssl secara aman agar tidak memaksa SSL jika database lokal tidak mendukungnya
 export const pool =
   globalForDb.pool ??
   new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    // Jika ingin mendeteksi SSL via environment variable terpisah (misal DB_SSL=true)
+    // Atau dimatikan total untuk koneksi internal Docker/VPS lokal
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   });
 
 if (process.env.NODE_ENV !== 'production') {
@@ -18,7 +21,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export const query = async (text: string, params?: any[]) => {
-  const start = Date.now();
   try {
     const res = await pool.query(text, params);
     return res;
