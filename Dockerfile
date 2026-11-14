@@ -1,10 +1,10 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Salin package.json dan package-lock.json yang baru dibuat
+# Salin package.json dan package-lock.json
 COPY package.json package-lock.json ./
 
-# Instal dependensi menggunakan npm ci (standar produksi yang aman dan cepat)
+# Instal dependensi menggunakan npm ci
 RUN npm ci
 
 # Salin seluruh sisa file proyek
@@ -13,7 +13,7 @@ COPY . .
 # Build aplikasi Next.js
 RUN npm run build
 
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
