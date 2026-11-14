@@ -2,9 +2,8 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-# Izinkan build script esbuild/dependency
-RUN pnpm config set ignore-build-scripts false
-RUN pnpm install --frozen-lockfile=false
+# Install dependencies tanpa strict lockfile dan izinkan build scripts
+RUN pnpm install --frozen-lockfile=false --unsafe-perm=true
 COPY . .
 RUN pnpm build
 
