@@ -44,10 +44,8 @@ export default function AuthForm({
   const disabled = !configured || busy !== null || (mode === 'reset' && !sessionValid);
 
   async function send(action: string, body: object) {
-    // Koreksi endpoint: Jika mode 'login', arahkan ke backend 'signin'
-    const endpointAction = action === 'login' ? 'signin' : action;
-
-    const response = await fetch(`/api/auth/${endpointAction}`, {
+    // Memastikan aksi 'login' atau 'signup' langsung menembak ke rute /api/auth/[action]
+    const response = await fetch(`/api/auth/${action}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -100,15 +98,15 @@ export default function AuthForm({
         return;
       }
 
-      // Fallback redirect otomatis jika mode login berhasil
+      // Paksa arahkan ke /dashboard jika mode login sukses dan backend belum mengirim redirect
       if (mode === 'login') {
         window.location.assign('/dashboard');
         return;
       }
 
       setSuccess(result.message || 'Permintaan berhasil diproses.');
-    } catch (e) {
-      setError(e instanceof TypeError ? 'Koneksi terputus. Periksa koneksi lalu coba lagi.' : (e as Error).message);
+    } catch (e: any) {
+      setError(e instanceof TypeError ? 'Koneksi terputus. Periksa koneksi lalu coba lagi.' : (e.message || 'Terjadi kesalahan pada server.'));
     } finally {
       setBusy(null);
     }
