@@ -1,9 +1,21 @@
-export function authConfig(){
- const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
- const key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
- if(!url||!key)return null;
- try{const parsed=new URL(url);if(!['https:','http:'].includes(parsed.protocol))return null;return {url,key};}catch{return null;}
+import { query } from '@/lib/db';
+
+// Fungsi untuk mencari user berdasarkan email di database PostgreSQL
+export async function getUserByEmail(email: string) {
+  try {
+    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
+    return result.rows[0] || null;
+  } catch (error) {
+    console.error('Error fetching user by email:', error);
+    return null;
+  }
 }
-export function localPreviewAllowed(){return process.env.NODE_ENV!=='production'||process.env.TRAVELOS_LOCAL_PREVIEW==='1';}
-export function workspaceAllowed(userId:string){return (process.env.TRAVELOS_WORKSPACE_USER_IDS||'').split(',').map(id=>id.trim()).filter(Boolean).includes(userId);}
-export function safeAuthNext(value:string|null|undefined){return value==='/reset-password'?value:'/welcome';}
+
+// Fungsi untuk membuat user baru di database PostgreSQL
+export async function createUser(email: string, passwordHash: string, name: string) {
+  const result = await query(
+    'INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING id, email, name, role',
+    [email, passwordHash, name]
+  );
+  return result.rows[0];
+}
