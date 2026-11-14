@@ -47,7 +47,9 @@ async function handlePost(request: Request, { params }: { params: Promise<{ acti
   }
   
   const { action } = await params;
-  if (!['login', 'signup', 'signout'].includes(action)) {
+  
+  // Izinkan 'signin' selain 'login', 'signup', dan 'signout'
+  if (!['login', 'signin', 'signup', 'signout'].includes(action)) {
     return NextResponse.json({ error: 'Halaman tidak ditemukan.' }, { status: 404 });
   }
 
@@ -92,7 +94,7 @@ async function handlePost(request: Request, { params }: { params: Promise<{ acti
       return NextResponse.json({ redirect: '/welcome' });
     }
 
-    if (action === 'login') {
+    if (action === 'login' || action === 'signin') {
       const parsed = schemas.login.safeParse(body);
       if (!parsed.success) {
         return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Periksa isian form.' }, { status: 400 });
@@ -114,7 +116,7 @@ async function handlePost(request: Request, { params }: { params: Promise<{ acti
         maxAge: 60 * 60 * 24 * 7,
       });
 
-      return NextResponse.json({ redirect: '/welcome' });
+      return NextResponse.json({ redirect: '/dashboard' });
     }
 
     return NextResponse.json({ error: 'Aksi tidak valid.' }, { status: 400 });
