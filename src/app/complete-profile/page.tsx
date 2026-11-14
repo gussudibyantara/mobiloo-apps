@@ -2,12 +2,37 @@ import { redirect } from 'next/navigation';
 import AuthShell from '@/components/auth/auth-shell';
 import ContactForm from '@/components/auth/contact-form';
 import { authConfig } from '@/lib/auth/config';
-import { authClient } from '@/lib/auth/server';
+import { getSession } from '@/lib/auth/server';
 import { normalizeWhatsApp } from '@/lib/auth/contact';
-export const metadata={title:'Lengkapi akun — TravelOS'};
-export const dynamic='force-dynamic';
-export default async function Page(){
- if(!authConfig())redirect('/login');const client=await authClient();const {data,error}=await client.auth.getUser();if(error||!data.user)redirect('/login');
- if(normalizeWhatsApp(data.user.user_metadata.whatsapp_number||''))redirect('/welcome');
- return <AuthShell><ContactForm/></AuthShell>;
+
+export const metadata = { title: 'Lengkapi akun — TravelOS' };
+export const dynamic = 'force-dynamic';
+
+export default async function Page() {
+  // Perbaikan: authConfig diakses sebagai objek, bukan dipanggil sebagai fungsi ()
+  if (!authConfig) {
+    redirect('/login');
+  }
+
+  // Mengambil sesi user langsung dari backend PostgreSQL / Cookie lokal kita
+  const session = await getSession();
+
+  if (!session || !session.user) {
+    redirect('/login');
+  }
+
+  const user = session.user;
+
+  // Memeriksa nomor WhatsApp dari metadata atau properti user PostgreSQL
+  const whatsappNumber = user.whatsapp_number || user.user_metadata?.whatsapp_number || '';
+
+  if (normalizeWhatsApp(whatsappNumber)) {
+    redirect('/welcome');
+  }
+
+  return (
+    <AuthShell>
+      <ContactForm />
+    </AuthShell>
+  );
 }

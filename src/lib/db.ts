@@ -1,10 +1,21 @@
 import { Pool } from 'pg';
 
-// Membuat pool koneksi menggunakan DATABASE_URL dari environment variables
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+// Mencegah error instance ganda saat proses hot-reload di development
+const globalForDb = globalThis as unknown as {
+  pool: Pool | undefined;
+};
+
+// Membuat pool koneksi menggunakan DATABASE_URL
+export const pool =
+  globalForDb.pool ??
+  new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForDb.pool = pool;
+}
 
 export const query = async (text: string, params?: any[]) => {
   const start = Date.now();

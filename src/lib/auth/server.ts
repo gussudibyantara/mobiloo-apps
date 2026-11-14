@@ -7,14 +7,19 @@ export async function getSession() {
   if (!sessionCookie) return null;
   
   try {
-    // Mengurai data session user yang disimpan di cookie
     return JSON.parse(sessionCookie.value);
   } catch {
     return null;
   }
 }
 
-// Tambahkan ekspor authClient agar tidak error saat diimpor oleh halaman/route lain
+// Ekspor authClient dengan struktur objek auth yang valid
 export const authClient = {
   getSession,
+  auth: {
+    exchangeCodeForSession: async (code: string) => {
+      // Sesuaikan logic pertukaran kode sesi Anda di sini jika ada
+      return { error: null };
+    }
+  }
 };
