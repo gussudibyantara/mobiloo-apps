@@ -1,16 +1,13 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Salin konfigurasi dependensi
-COPY package.json pnpm-lock.yaml ./
+# Salin package.json dan package-lock.json yang baru dibuat
+COPY package.json package-lock.json ./
 
-# Ubah pnpm-lock.yaml menjadi package-lock.json secara otomatis agar npm bisa langsung instal dengan stabil
-RUN npm install -g pnpm && pnpm import && rm pnpm-lock.yaml
-
-# Instal dependensi menggunakan npm standar (bersih, stabil, tanpa error esbuild)
+# Instal dependensi menggunakan npm ci (standar produksi yang aman dan cepat)
 RUN npm ci
 
-# Salin seluruh file proyek
+# Salin seluruh sisa file proyek
 COPY . .
 
 # Build aplikasi Next.js
