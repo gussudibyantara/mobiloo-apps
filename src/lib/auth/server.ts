@@ -13,3 +13,8 @@ export async function getSession() {
     return null;
   }
 }
+
+// Tambahkan ekspor authClient agar tidak error saat diimpor oleh halaman/route lain
+export const authClient = {
+  getSession,
+};
